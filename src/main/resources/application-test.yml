@@ -15,4 +15,4 @@ spring:
     enabled: false
 
 app:
-  github-username: johndoe47
+  github-username: ahmad-user

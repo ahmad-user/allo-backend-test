@@ -25,4 +25,4 @@ spring:
     baseline-on-migrate: true
 
 app:
-  github-username: ${GITHUB_USERNAME:fadil}
+  github-username: ${GITHUB_USERNAME:ahmad-user}

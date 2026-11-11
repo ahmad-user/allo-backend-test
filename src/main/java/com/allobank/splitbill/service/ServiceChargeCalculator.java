@@ -11,7 +11,7 @@ public class ServiceChargeCalculator {
 
     private final String githubUsername;
 
-    public ServiceChargeCalculator(@Value("${app.github-username:fadil}") String githubUsername) {
+    public ServiceChargeCalculator(@Value("${app.github-username:ahmad-user}") String githubUsername) {
         this.githubUsername = githubUsername;
     }
 

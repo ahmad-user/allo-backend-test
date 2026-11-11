@@ -12,6 +12,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ServiceChargeCalculatorTest {
 
     @Test
+    @DisplayName("Calculate service charge pct for configured username ahmad-user should be 9")
+    void testAhmadUser() {
+        ServiceChargeCalculator calculator = new ServiceChargeCalculator("ahmad-user");
+        int pct = calculator.getServiceChargePct();
+        // 'a'(97) + 'h'(104) + 'm'(109) + 'a'(97) + 'd'(100) + '-'(45) + 'u'(117) + 's'(115) + 'e'(101) + 'r'(114) = 999
+        // 999 % 10 = 9
+        assertEquals(9, pct);
+    }
+
+    @Test
+    @DisplayName("Default constructor should use configured fallback username ahmad-user yielding 9%")
+    void testDefaultConstructorFallback() {
+        ServiceChargeCalculator calculator = new ServiceChargeCalculator("ahmad-user");
+        assertEquals(9, calculator.getServiceChargePct());
+    }
+
+    @Test
     @DisplayName("Calculate service charge pct for example username johndoe47 should be 0")
     void testJohnDoe47() {
         ServiceChargeCalculator calculator = new ServiceChargeCalculator("johndoe47");
@@ -21,6 +38,8 @@ class ServiceChargeCalculatorTest {
 
     @ParameterizedTest
     @CsvSource({
+            "ahmad-user, 9",
+            "AHMAD-USER, 9",
             "johndoe47, 0",
             "JOHNDOE47, 0",
             "alice, 0",     // 97+108+105+99+101 = 510 -> 0
@@ -31,6 +50,15 @@ class ServiceChargeCalculatorTest {
         ServiceChargeCalculator calculator = new ServiceChargeCalculator(username);
         int pct = calculator.getServiceChargePct();
         assertEquals(expectedPct, pct);
+    }
+
+    @Test
+    @DisplayName("Service charge amount calculation for ahmad-user (9%) on 390000.00 should be 35100.00")
+    void testServiceChargeAmountAhmadUser() {
+        ServiceChargeCalculator calculator = new ServiceChargeCalculator("ahmad-user");
+        BigDecimal totalExpenses = new BigDecimal("390000.00");
+        BigDecimal amount = calculator.calculateServiceChargeAmount(totalExpenses, 9);
+        assertEquals(new BigDecimal("35100.00"), amount);
     }
 
     @Test

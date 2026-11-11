@@ -29,7 +29,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-splitbill}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      GITHUB_USERNAME: ${GITHUB_USERNAME:-fadil}
+      GITHUB_USERNAME: ${GITHUB_USERNAME:-ahmad-user}
     depends_on:
       postgres:
         condition: service_healthy

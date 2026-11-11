@@ -11,9 +11,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.comparesEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -64,7 +66,7 @@ class GroupControllerIntegrationTest {
         // 2. Add Expense 1: Alice pays 300000 for Alice, Bob, Charlie
         Map<String, Object> addExpenseReq1 = Map.of(
                 "description", "Dinner",
-                "amount", 300000.00,
+                "amount", new BigDecimal("300000.00"),
                 "paidByParticipantId", aliceId,
                 "participantIds", List.of(aliceId, bobId, charlieId)
         );
@@ -74,12 +76,12 @@ class GroupControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(addExpenseReq1)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.amount", is(300000.00)));
+                .andExpect(jsonPath("$.amount", comparesEqualTo(new BigDecimal("300000.00")), BigDecimal.class));
 
         // 3. Add Expense 2: Bob pays 90000 for Bob & Charlie
         Map<String, Object> addExpenseReq2 = Map.of(
                 "description", "Taxi",
-                "amount", 90000.00,
+                "amount", new BigDecimal("90000.00"),
                 "paidByParticipantId", bobId,
                 "participantIds", List.of(bobId, charlieId)
         );
@@ -94,31 +96,31 @@ class GroupControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].description", is("Dinner")))
-                .andExpect(jsonPath("$[0].amount", is(300000.00)))
+                .andExpect(jsonPath("$[0].amount", comparesEqualTo(new BigDecimal("300000.00")), BigDecimal.class))
                 .andExpect(jsonPath("$[1].description", is("Taxi")))
-                .andExpect(jsonPath("$[1].amount", is(90000.00)));
+                .andExpect(jsonPath("$[1].amount", comparesEqualTo(new BigDecimal("90000.00")), BigDecimal.class));
 
         // 5. Get Settlement Summary
         // Total expenses = 390000.00
-        // Service charge for 'johndoe47' = 0% -> 0.00
+        // Service charge for 'ahmad-user' = 9% -> 35100.00
         // Alice paid 300000, share 100000 -> net +200000
         // Bob paid 90000, share 145000 -> net -55000
         // Charlie paid 0, share 145000 -> net -145000
-        // Settlements: Bob -> Alice 55000, Charlie -> Alice 145000
+        // Settlements: Charlie -> Alice 145000.00, Bob -> Alice 55000.00
         mockMvc.perform(get("/api/groups/" + groupId + "/settlement"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.group_id", is(groupId.intValue())))
                 .andExpect(jsonPath("$.group_name", is("Trip Bandung")))
-                .andExpect(jsonPath("$.total_expenses", is(390000.00)))
-                .andExpect(jsonPath("$.service_charge_pct", is(0)))
-                .andExpect(jsonPath("$.service_charge_amount", is(0.00)))
+                .andExpect(jsonPath("$.total_expenses", comparesEqualTo(new BigDecimal("390000.00")), BigDecimal.class))
+                .andExpect(jsonPath("$.service_charge_pct", is(9)))
+                .andExpect(jsonPath("$.service_charge_amount", comparesEqualTo(new BigDecimal("35100.00")), BigDecimal.class))
                 .andExpect(jsonPath("$.settlements", hasSize(2)))
                 .andExpect(jsonPath("$.settlements[0].from_participant_id", is(charlieId.intValue())))
                 .andExpect(jsonPath("$.settlements[0].to_participant_id", is(aliceId.intValue())))
-                .andExpect(jsonPath("$.settlements[0].amount", is(145000.00)))
+                .andExpect(jsonPath("$.settlements[0].amount", comparesEqualTo(new BigDecimal("145000.00")), BigDecimal.class))
                 .andExpect(jsonPath("$.settlements[1].from_participant_id", is(bobId.intValue())))
                 .andExpect(jsonPath("$.settlements[1].to_participant_id", is(aliceId.intValue())))
-                .andExpect(jsonPath("$.settlements[1].amount", is(55000.00)));
+                .andExpect(jsonPath("$.settlements[1].amount", comparesEqualTo(new BigDecimal("55000.00")), BigDecimal.class));
     }
 
     @Test
@@ -144,7 +146,7 @@ class GroupControllerIntegrationTest {
     void testExpenseGroupNotFound() throws Exception {
         Map<String, Object> req = Map.of(
                 "description", "Lunch",
-                "amount", 50000.00,
+                "amount", new BigDecimal("50000.00"),
                 "paidByParticipantId", 999,
                 "participantIds", List.of(999L)
         );
