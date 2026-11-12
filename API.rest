@@ -1,0 +1,251 @@
+
+@baseUrl = http://localhost:4110
+@groupId = 1
+
+### ==========================================
+### 1. CREATE GROUP
+### ==========================================
+
+# Create a group with 3 participants
+# Expected: 201 Created
+
+POST {{baseUrl}}/api/groups
+Content-Type: application/json
+
+{
+  "name": "Trip Bandung",
+  "participants": [
+    {
+      "name": "Alice"
+    },
+    {
+      "name": "Bob"
+    },
+    {
+      "name": "Charlie"
+    }
+  ]
+}
+
+
+### ==========================================
+### 2. GET GROUP DETAILS
+### ==========================================
+
+# Get group details and participants
+# Expected: 200 OK
+
+GET {{baseUrl}}/api/groups/{{groupId}}
+Accept: application/json
+
+
+### ==========================================
+### 3. CREATE ANOTHER GROUP
+### ==========================================
+
+POST {{baseUrl}}/api/groups
+Content-Type: application/json
+
+{
+  "name": "Weekend Jakarta",
+  "participants": [
+    {
+      "name": "David"
+    },
+    {
+      "name": "Emma"
+    }
+  ]
+}
+
+
+### ==========================================
+### 4. ADD EXPENSE - DINNER
+### ==========================================
+
+# Alice pays Rp300.000 for all participants
+# Expected: 201 Created
+
+POST {{baseUrl}}/api/groups/{{groupId}}/expenses
+Content-Type: application/json
+
+{
+  "description": "Dinner",
+  "amount": 300000.00,
+  "paidByParticipantId": 1,
+  "participantIds": [1, 2, 3]
+}
+
+
+### ==========================================
+### 5. ADD EXPENSE - TAXI
+### ==========================================
+
+# Bob pays Rp90.000 for Bob and Charlie
+# Expected: 201 Created
+
+POST {{baseUrl}}/api/groups/{{groupId}}/expenses
+Content-Type: application/json
+
+{
+  "description": "Taxi",
+  "amount": 90000.00,
+  "paidByParticipantId": 2,
+  "participantIds": [2, 3]
+}
+
+
+### ==========================================
+### 6. GET ALL EXPENSES
+### ==========================================
+
+# Get all expenses belonging to a group
+# Expected: 200 OK
+
+GET {{baseUrl}}/api/groups/{{groupId}}/expenses
+Accept: application/json
+
+
+### ==========================================
+### 7. GET SETTLEMENT SUMMARY
+### ==========================================
+
+# Calculate debts, service charge and transactions
+# Expected: 200 OK
+
+GET {{baseUrl}}/api/groups/{{groupId}}/settlement
+Accept: application/json
+
+
+### ==========================================
+### 8. VALIDATION TEST - EMPTY GROUP NAME
+### ==========================================
+
+# Expected: 400 Bad Request
+
+POST {{baseUrl}}/api/groups
+Content-Type: application/json
+
+{
+  "name": "Trip Bandung",
+  "participants": [
+    {
+      "name": "Alice"
+    }
+  ]
+}
+
+
+### ==========================================
+### 9. VALIDATION TEST - EMPTY PARTICIPANTS
+### ==========================================
+
+# Expected: 400 Bad Request
+
+POST {{baseUrl}}/api/groups
+Content-Type: application/json
+
+{
+  "name": "Invalid Group",
+  "participants": []
+}
+
+
+### ==========================================
+### 10. VALIDATION TEST - EMPTY PARTICIPANT NAME
+### ==========================================
+
+# Expected: 400 Bad Request
+
+POST {{baseUrl}}/api/groups
+Content-Type: application/json
+
+{
+  "name": "Invalid Group",
+  "participants": [
+    {
+      "name": ""
+    }
+  ]
+}
+
+
+### ==========================================
+### 11. VALIDATION TEST - MISSING EXPENSE DESCRIPTION
+### ==========================================
+
+# Expected: 400 Bad Request
+
+POST {{baseUrl}}/api/groups/{{groupId}}/expenses
+Content-Type: application/json
+
+{
+  "description": "ok",
+  "amount": 100000,
+  "paidByParticipantId": 1,
+  "participantIds": [1, 2]
+}
+
+
+### ==========================================
+### 12. VALIDATION TEST - ZERO EXPENSE AMOUNT
+### ==========================================
+
+# Expected: 400 Bad Request
+
+POST {{baseUrl}}/api/groups/{{groupId}}/expenses
+Content-Type: application/json
+
+{
+  "description": "Invalid Expense",
+  "amount": 0,
+  "paidByParticipantId": 1,
+  "participantIds": [1, 2]
+}
+
+
+### ==========================================
+### 13. VALIDATION TEST - EMPTY PARTICIPANT IDS
+### ==========================================
+
+# Expected: 400 Bad Request
+
+POST {{baseUrl}}/api/groups/{{groupId}}/expenses
+Content-Type: application/json
+
+{
+  "description": "Invalid Expense",
+  "amount": 100000,
+  "paidByParticipantId": 1,
+  "participantIds": []
+}
+
+
+### ==========================================
+### 14. ERROR TEST - NON-EXISTENT GROUP
+### ==========================================
+
+# Expected: 404 Not Found
+
+GET {{baseUrl}}/api/groups/999999
+Accept: application/json
+
+
+### ==========================================
+### 15. ERROR TEST - NON-EXISTENT GROUP EXPENSES
+### ==========================================
+
+# Expected: 404 Not Found
+
+GET {{baseUrl}}/api/groups/999999/expenses
+Accept: application/json
+
+
+### ==========================================
+### 16. ERROR TEST - NON-EXISTENT GROUP SETTLEMENT
+### ==========================================
+
+# Expected: 404 Not Found
+
+GET {{baseUrl}}/api/groups/999999/settlement
+Accept: application/json
